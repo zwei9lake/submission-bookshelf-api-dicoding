@@ -1,6 +1,7 @@
 const { nanoid } = require("nanoid");
 const books = require("./books");
 
+// Menyimpan Buku
 const addBook = (request, h) => {
   const {
     name,
@@ -32,6 +33,7 @@ const addBook = (request, h) => {
     updatedAt,
   };
 
+  //Client Tidak melampirkan property name pada requset body
   if (name === undefined) {
     const response = h.response({
       status: "fail",
@@ -41,6 +43,7 @@ const addBook = (request, h) => {
     return response;
   }
 
+  //Client melampirkan nilai properti readPage yang lebih besar dari nilai properti pageCount
   if (readPage > pageCount) {
     const response = h.response({
       status: "fail",
@@ -54,6 +57,7 @@ const addBook = (request, h) => {
   books.push(newBook);
   const isSuccess = books.filter((book) => book.id === id).length > 0;
 
+  //Jika buku berhasil dimasukkan atau disimpan
   if (isSuccess) {
     const response = h.response({
       status: "success",
@@ -66,6 +70,7 @@ const addBook = (request, h) => {
     return response;
   }
 
+  //Jika server gagal memasukkan atau menyimpan buku
   const response = h.response({
     status: "error",
     message: "Buku gagal ditambahkan",
@@ -74,16 +79,78 @@ const addBook = (request, h) => {
   return response;
 };
 
-const getAllBooks = () => ({
-  status: "success",
-  data: {
-    books: books.map((book) => ({
-      id: book.id,
-      name: book.name,
-      publisher: book.publisher,
-    })),
-  },
-});
+//Mendapatkan dan menampilkan seluruh data buku
+const getAllBooks = (request, h) => {
+  const { name, reading, finished } = request.query;
+
+  if (name !== undefined) {
+    const nameQuery = books.filter((book) =>
+      book.name.toLowerCase().includes(name.toLowerCase())
+    );
+    const response = h.response({
+      status: "success",
+      data: {
+        books: nameQuery.map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        })),
+      },
+    });
+    response.code(200);
+
+    return response;
+  }
+
+  if (reading !== undefined) {
+    const readBook = books.filter(
+      (book) => Number(book.reading) === Number(reading)
+    );
+    const response = h.response({
+      status: "success",
+      data: {
+        books: readBook.map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        })),
+      },
+    });
+    response.code(200);
+    return response;
+  }
+
+  if (finished !== undefined) {
+    const finishedBook = books.filter(
+      (book) => Number(book.finished) === Number(finished)
+    );
+    const response = h.response({
+      status: "success",
+      data: {
+        books: finishedBook.map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        })),
+      },
+    });
+    response.code(200);
+    return response;
+  }
+
+  const response = h.response({
+    status: "success",
+    data: {
+      books: books.map((book) => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher,
+      })),
+    },
+  });
+  response.code(200);
+  return response;
+};
 
 const getBookById = (request, h) => {
   const { bookId } = request.params;
