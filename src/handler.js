@@ -83,6 +83,7 @@ const addBook = (request, h) => {
 const getAllBooks = (request, h) => {
   const { name, reading, finished } = request.query;
 
+  //Query parameters untuk menampilkan buku berdasarkan nama yang dicari
   if (name !== undefined) {
     const nameQuery = books.filter((book) =>
       book.name.toLowerCase().includes(name.toLowerCase())
@@ -102,6 +103,7 @@ const getAllBooks = (request, h) => {
     return response;
   }
 
+  //Query parameters untuk menampilkan buku yang sedang dibaca/belum
   if (reading !== undefined) {
     const readBook = books.filter(
       (book) => Number(book.reading) === Number(reading)
@@ -120,6 +122,7 @@ const getAllBooks = (request, h) => {
     return response;
   }
 
+  //Query parameters untuk menampilkan buku yang sudah diselesaikan
   if (finished !== undefined) {
     const finishedBook = books.filter(
       (book) => Number(book.finished) === Number(finished)
@@ -138,6 +141,7 @@ const getAllBooks = (request, h) => {
     return response;
   }
 
+  //Berhasil menampilkan buku
   const response = h.response({
     status: "success",
     data: {
@@ -152,6 +156,7 @@ const getAllBooks = (request, h) => {
   return response;
 };
 
+//Menampilkan buku berdasarkan id yang dicari
 const getBookById = (request, h) => {
   const { bookId } = request.params;
   const book = books.filter((b) => b.id === bookId)[0];
@@ -164,6 +169,7 @@ const getBookById = (request, h) => {
     };
   }
 
+  //Jika id buku tidak ditemukan
   const response = h.response({
     status: "fail",
     message: "Buku tidak ditemukan",
@@ -172,6 +178,7 @@ const getBookById = (request, h) => {
   return response;
 };
 
+//Melakukan edit/perubahan pada buku
 const editBookById = (request, h) => {
   const { bookId } = request.params;
   const {
@@ -202,6 +209,7 @@ const editBookById = (request, h) => {
       updatedAt,
     };
 
+    //Client tidak melampirkan properti name pada request body
     if (name === undefined) {
       const response = h.response({
         status: "fail",
@@ -211,6 +219,7 @@ const editBookById = (request, h) => {
       return response;
     }
 
+    //Client melampirkan nilai properti readPage yang lebih besar dari nilai properti pageCount
     if (readPage > pageCount) {
       const response = h.response({
         status: "fail",
@@ -220,6 +229,7 @@ const editBookById = (request, h) => {
       response.code(400);
       return response;
     }
+    //Jika buku berhasil diperbarui, kembalikan response
     const response = h.response({
       status: "success",
       message: "Buku berhasil diperbarui",
@@ -228,6 +238,7 @@ const editBookById = (request, h) => {
     return response;
   }
 
+  //Jika id yang dilampirkan oleh client tidak ditemukkan oleh server
   const response = h.response({
     status: "fail",
     message: "Gagal memperbarui buku. Id tidak ditemukan",
@@ -236,11 +247,13 @@ const editBookById = (request, h) => {
   return response;
 };
 
+//Menghapus buku
 const deleteBookById = (request, h) => {
   const { bookId } = request.params;
 
   const index = books.findIndex((book) => book.id === bookId);
 
+  //Jika id dimiliki oleh salah satu buku, maka buku tersebut harus dihapus
   if (index !== -1) {
     books.splice(index, 1);
     const response = h.response({
@@ -251,6 +264,7 @@ const deleteBookById = (request, h) => {
     return response;
   }
 
+  //Jika id yang dilampirkan tidak dimiliki oleh buku manapun
   const response = h.response({
     status: "fail",
     message: "Buku gagal dihapus. Id tidak ditemukan",
